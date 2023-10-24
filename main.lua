@@ -26,6 +26,10 @@ function StateUpdate()
     state.currentPlayer = game_api.getCurrentPlayer()
     state.FontOfMagic = game_api.hasTalent(talents.FontOfMagic)
 
+    state.afflictedUnits = game_api.getUnitsByNpcId(204773)
+    state.incorporealUnits = game_api.getUnitsByNpcId(204560)
+
+
     if state.FontOfMagic then
         state.chargedSpellsMaxRank = 3
     else 
@@ -38,6 +42,33 @@ function StateUpdate()
         state.reversionMaxCharge = 1
     end
     
+end
+
+
+function Affix()
+    if game_api.getToggle(settings.Dispel) then
+
+        if (#state.afflictedUnits > 0) and (game_api.canCast(spells.Naturalize) or game_api.canCast(spells.CauterizingFlame)) then
+            for _, unit in ipairs(state.afflictedUnits) do
+                if (game_api.distanceToUnit(unit) < 30.0) and (game_api.unitIsCasting(unit) or game_api.unitIsChanneling(unit)) then
+
+                    if game_api.canCast(spells.Naturalize) then
+                        game_api.castSpellOnTarget(spells.Naturalize,unit)
+                        return true
+
+                    end
+
+                    if game_api.canCast(spells.CauterizingFlame) then
+                        game_api.castSpellOnTarget(spells.CauterizingFlame,unit)
+                        return true
+
+                    end
+                end
+            end
+        end
+    
+    end
+    return false
 end
 
 function Dps()
@@ -311,7 +342,11 @@ function OnUpdate()
     if game_api.currentPlayerIsCasting() or game_api.currentPlayerIsMounted() or game_api.currentPlayerIsChanneling() or game_api.isAOECursor() then
         return
     end
-        
+
+    if Affix() then
+        return true
+    end
+
     if Healing() then
         return true
     end
