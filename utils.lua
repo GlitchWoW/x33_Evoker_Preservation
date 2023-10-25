@@ -5,6 +5,21 @@ game_api = require("lib")
 
 
 --[[
+    Check if a party units in range doesn't have a buff
+]]
+function utils.PartyUnitsCountWithoutAura(auraID,range,checkIfOwnAura)
+    local count = 0
+    local ownAura = (checkIfOwnAura and true or false)
+    local partyUnits = game_api.getPartyUnits()
+    for _, playerPartyUnit in ipairs(partyUnits) do
+        if (game_api.distanceToUnit(playerPartyUnit) < range) and (not game_api.unitHasAura(playerPartyUnit,auraID,ownAura)) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+--[[
     Dispel Function
 ]]
 function utils.UnitToDispel(DispelType, DispelType2, DispelType3, DispelType4, DispelType5, DispelType6)

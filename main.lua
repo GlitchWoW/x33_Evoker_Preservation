@@ -26,8 +26,13 @@ function StateUpdate()
     state.currentPlayer = game_api.getCurrentPlayer()
     state.FontOfMagic = game_api.hasTalent(talents.FontOfMagic)
 
+    state.currentHpPercent = game_api.unitHealthPercent(state.currentPlayer)
+
+
     state.afflictedUnits = game_api.getUnitsByNpcId(204773)
     state.incorporealUnits = game_api.getUnitsByNpcId(204560)
+
+    state.party = game_api.getPartyUnits()
 
 
     if state.FontOfMagic then
@@ -91,6 +96,22 @@ function Dps()
         game_api.castSpellOnTarget(spells.LivingFlame,state.currentTarget)
         return true
     end
+
+    return false
+end
+
+function Defensive()
+
+    if game_api.hasTalent(talents.RenewingBlaze) and game_api.canCast(spells.RenewingBlaze) and state.currentHpPercent < game_api.getSetting(settings.RenewingBlazePercent) then
+        game_api.castSpell(spells.RenewingBlaze)
+        return true
+    end
+
+    if game_api.hasTalent(talents.ObsidianScales) and game_api.canCast(spells.ObsidianScales) and state.currentHpPercent < game_api.getSetting(settings.ObsidianScalePercent) then
+        game_api.castSpell(spells.ObsidianScales)
+        return true
+    end
+
 
     return false
 end
@@ -300,24 +321,19 @@ end
     Run on eatch engine tick if game has focus and is not loading
 ]]
 function OnUpdate()
-
+    
+    
     --Preservation Evoker
     if not game_api.isSpec(356810) then
         return true
     end
-
     if game_api.getToggle(settings.Pause) then
         return true
     end
+    
 
     StateUpdate()
-
-    --BlessingOfTheBronze auto buff
-    if not game_api.currentPlayerHasAura(auras.BlessingOfTheBronze,false) and game_api.canCast(spells.BlessingOfTheBronze) then
-        game_api.castSpell(spells.BlessingOfTheBronze);
-        return true
-    end
-      
+    
     --charged spell
     if game_api.currentPlayerIsChanneling() then
         if ( game_api.getCurrentPlayerChannelID() == spells.FireBreath or game_api.getCurrentPlayerChannelID() == spells.FireBreathFOM ) and utils.EmpowerRank(game_api.getCurrentPlayerChannelPercentage(),state.chargedSpellsMaxRank) > 0 then
@@ -336,14 +352,21 @@ function OnUpdate()
         end
     end
     
-
-    
-
     if game_api.currentPlayerIsCasting() or game_api.currentPlayerIsMounted() or game_api.currentPlayerIsChanneling() or game_api.isAOECursor() then
         return
     end
 
+    --BlessingOfTheBronze auto buff
+    --if game_api.canCast(spells.BlessingOfTheBronze) and (utils.PartyUnitsCountWithoutAura(auras.BlessingOfTheBronze,40,false) > 0) then
+       -- game_api.castSpell(spells.BlessingOfTheBronze);
+       -- return true
+   -- end
+
     if Affix() then
+        return true
+    end
+
+    if Defensive() then
         return true
     end
 
@@ -354,6 +377,6 @@ function OnUpdate()
     if Dps() then
         return true
     end
-
+   
 
 end
