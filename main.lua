@@ -262,7 +262,7 @@ function Healing()
     end
 
 
-    if game_api.canCast(spells.TipTheScales) then
+    if game_api.canCast(spells.TipTheScales) and not game_api.currentPlayerHasAura(auras.TipTheScales,true) then
         local partyUnderTipTheScalePercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.TipTheScalePercent),99.0)
         if #partyUnderTipTheScalePercent >= game_api.getSetting(settings.TipTheScaleParty) then
             game_api.castSpell(spells.TipTheScales)
