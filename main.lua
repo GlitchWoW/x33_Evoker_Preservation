@@ -35,7 +35,7 @@ function StateUpdate()
     state.party = game_api.getPartyUnits()
 
 
-    if state.FontOfMagic then
+    if not state.FontOfMagic then
         state.chargedSpellsMaxRank = 3
     else 
         state.chargedSpellsMaxRank = 4
@@ -52,6 +52,7 @@ end
 
 function Affix()
     if game_api.getToggle(settings.Dispel) then
+        state.afflictedUnits = game_api.getUnitsByNpcId(204773)
 
         if (#state.afflictedUnits > 0) and (game_api.canCast(spells.Naturalize) or game_api.canCast(spells.CauterizingFlame)) then
             for _, unit in ipairs(state.afflictedUnits) do
@@ -356,11 +357,11 @@ function OnUpdate()
         return
     end
 
-    --BlessingOfTheBronze auto buff
-    --if game_api.canCast(spells.BlessingOfTheBronze) and (utils.PartyUnitsCountWithoutAura(auras.BlessingOfTheBronze,40,false) > 0) then
-       -- game_api.castSpell(spells.BlessingOfTheBronze);
-       -- return true
-   -- end
+    -- BlessingOfTheBronze auto buff
+    if game_api.canCast(spells.BlessingOfTheBronze) and not game_api.currentPlayerHasAura(auras.BlessingOfTheBronze,false) then
+        game_api.castSpell(spells.BlessingOfTheBronze)
+        return true
+    end
 
     if Affix() then
         return true
