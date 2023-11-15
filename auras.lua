@@ -8,6 +8,8 @@ auras.TipTheScales = 370553
 auras.Echo = 364343
 auras.Reversion = 366155
 auras.CallOfYsera = 373835
+auras.AncientFlames = 375583
+auras.CycleOfLife = 388973
 
 auras.LeapingFlamesTalent = 369939
 auras.BurnoutTalent = 375801

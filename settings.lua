@@ -2,7 +2,7 @@ local settings = {}
 game_api = require("lib")
 
 --Toogles
-settings.DeepBreath = "DeepBreath"
+settings.DreamFlight = "DreamFlight"
 settings.VerdantEmbrace = "VerdantEmbrace"
 settings.Cooldown = "Cooldown"
 settings.Dispel = "Dispel"
@@ -48,40 +48,40 @@ function settings.createSettings()
     game_api.createSetting(settings.EchoPercent,settings.EchoPercent,85,{0,100})
 
     game_api.createSetting(settings.BlossomParty,settings.BlossomParty,3,{0,50})
-    game_api.createSetting(settings.BlossomPercent,settings.BlossomPercent,35,{0,100})
+    game_api.createSetting(settings.BlossomPercent,settings.BlossomPercent,80,{0,100})
 
-    game_api.createSetting(settings.BloomParty,settings.BloomParty,3,{0,50})
-    game_api.createSetting(settings.BloomPercent,settings.BloomPercent,86,{0,100})
+    game_api.createSetting(settings.BloomParty,settings.BloomParty,4,{0,50})
+    game_api.createSetting(settings.BloomPercent,settings.BloomPercent,85,{0,100})
 
-    game_api.createSetting(settings.DreamBreathParty,settings.DreamBreathParty,2,{0,50})
-    game_api.createSetting(settings.DreamBreathPercent,settings.DreamBreathPercent,88,{0,100})
+    game_api.createSetting(settings.DreamBreathParty,settings.DreamBreathParty,4,{0,50})
+    game_api.createSetting(settings.DreamBreathPercent,settings.DreamBreathPercent,90,{0,100})
 
-    game_api.createSetting(settings.RewindParty,settings.RewindParty,3,{0,50})
-    game_api.createSetting(settings.RewindPercent,settings.RewindPercent,57,{0,100})
+    game_api.createSetting(settings.RewindParty,settings.RewindParty,9,{0,50})
+    game_api.createSetting(settings.RewindPercent,settings.RewindPercent,30,{0,100})
 
-    game_api.createSetting(settings.DreamFlightParty,settings.DreamFlightParty,5,{0,50})
-    game_api.createSetting(settings.DreamFlightPercent,settings.DreamFlightPercent,0,{0,100})
+    game_api.createSetting(settings.DreamFlightParty,settings.DreamFlightParty,6,{0,50})
+    game_api.createSetting(settings.DreamFlightPercent,settings.DreamFlightPercent,45,{0,100})
 
-    game_api.createSetting(settings.TipTheScaleParty,settings.TipTheScaleParty,3,{0,50})
-    game_api.createSetting(settings.TipTheScalePercent,settings.TipTheScalePercent,76,{0,100})
+    game_api.createSetting(settings.TipTheScaleParty,settings.TipTheScaleParty,4,{0,50})
+    game_api.createSetting(settings.TipTheScalePercent,settings.TipTheScalePercent,70,{0,100})
 
-    game_api.createSetting(settings.TemportalAnomalyParty,settings.TemportalAnomalyParty,3,{0,50})
-    game_api.createSetting(settings.TemportalAnomalyPercent,settings.TemportalAnomalyPercent,78,{0,100})
+    game_api.createSetting(settings.TemportalAnomalyParty,settings.TemportalAnomalyParty,4,{0,50})
+    game_api.createSetting(settings.TemportalAnomalyPercent,settings.TemportalAnomalyPercent,80,{0,100})
 
-    game_api.createSetting(settings.VerdantEmbracePercent,settings.VerdantEmbracePercent,30,{0,100})
+    game_api.createSetting(settings.VerdantEmbracePercent,settings.VerdantEmbracePercent,85,{0,100})
     game_api.createSetting(settings.VerdantEmbraceRange,settings.VerdantEmbraceRange,5,{0,25})
 
 
 
-    game_api.createSetting(settings.LivingFlamePercent,settings.LivingFlamePercent,78,{0,100})
-    game_api.createSetting(settings.TimeDilationPercent,settings.TimeDilationPercent,40,{0,100})
-    game_api.createSetting(settings.ReversionPercent,settings.ReversionPercent,97,{0,100})
+    game_api.createSetting(settings.LivingFlamePercent,settings.LivingFlamePercent,90,{0,100})
+    game_api.createSetting(settings.TimeDilationPercent,settings.TimeDilationPercent,75,{0,100})
+    game_api.createSetting(settings.ReversionPercent,settings.ReversionPercent,30,{0,100})
     game_api.createSetting(settings.ObsidianScalePercent,settings.ObsidianScalePercent,70,{0,100})
-    game_api.createSetting(settings.RenewingBlazePercent,settings.RenewingBlazePercent,97,{0,100})
+    game_api.createSetting(settings.RenewingBlazePercent,settings.RenewingBlazePercent,40,{0,100})
 
     
 
-    game_api.createToggle(settings.DeepBreath, settings.DeepBreath,false,0);
+    game_api.createToggle(settings.DreamFlight, settings.DreamFlight,false,0);
     game_api.createToggle(settings.VerdantEmbrace, settings.VerdantEmbrace,true,0);
     game_api.createToggle(settings.Cooldown, settings.Cooldown,true,0);
     game_api.createToggle(settings.Dispel, settings.Dispel,true,0);

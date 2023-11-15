@@ -35,7 +35,7 @@ function utils.UnitToDispel(DispelType, DispelType2, DispelType3, DispelType4, D
                 local debuffList = game_api.unitDebuffListWithDispelType(playerPartyUnit,dispelType)
                 if #debuffList > 0 then
                     local unitHealth = game_api.unitHealthPercent(playerPartyUnit)
-                    if unitHealth > 0 and unitHealth < lowestHealth then
+                    if (unitHealth > 0 and unitHealth < lowestHealth) and game_api.distanceToUnit(playerPartyUnit) <= 25 then
                         lowestHealth = unitHealth
                         lowestHealthUnit = playerPartyUnit
                     end

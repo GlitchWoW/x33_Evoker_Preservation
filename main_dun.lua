@@ -6,6 +6,7 @@ settings = require ("settings")
 utils = require ("utils")
 
 state = {}
+
 --[[
     Create your variable and toggle here
 ]]
@@ -82,8 +83,11 @@ function Dps()
         return false
     end
 
-
-    if game_api.hasTalent(talents.EnergyLoop) and game_api.currentPlayerHasAura(auras.EssenceBurst,true) and game_api.canCast(spells.Disintegrate) and game_api.currentPlayerDistanceFromTarget() <= 25.0 then
+    if ( game_api.canCast(spells.FireBreath) and not game_api.isOnCooldown(spells.FireBreathFOM) ) and state.currentMana >= 6500 and game_api.currentPlayerDistanceFromTarget() <= 25.0  then
+        game_api.castSpell(spells.FireBreath)
+        return true
+    end
+    if game_api.currentPlayerHasAura(auras.EssenceBurst,true) and game_api.canCast(spells.Disintegrate) and game_api.currentPlayerDistanceFromTarget() <= 25.0 then
         game_api.castSpellOnTarget(spells.Disintegrate,state.currentTarget)
         return true
     end
@@ -131,91 +135,47 @@ function Healing()
     end
 
 
+
     if (game_api.currentPlayerHasAura(auras.CallOfYsera,true)) and ( game_api.canCast(spells.DreamBreath) and not game_api.isOnCooldown(spells.DreamBreathFOM) ) then
         game_api.castSpell(spells.DreamBreath)
         return true
     end
 
-
-    -- consume ancient flames
-    if game_api.currentPlayerHasAura(auras.AncientFlames,true) and game_api.canCast(spells.LivingFlame) and game_api.unitAuraStackCount(state.currentPlayer,auras.EssenceBurst,true) < 2 then
-        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.LivingFlamePercent) + 10.0 ,30.0)
-        if #partyUnderLivingPercent > 0  then
-            game_api.castSpellOnTarget(spells.LivingFlame,partyUnderLivingPercent[1])
-            return true
-        end
-    end
-
-    -- Blossom
-    if game_api.canCast(spells.EmeraldBlossom) and game_api.currentPlayerHasAura(auras.EssenceBurst,true) then
-        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.BlossomPercent),30.0)
-        if #partyUnderLivingPercent > game_api.getSetting(settings.BlossomParty)  then
-            game_api.castSpellOnTarget(spells.EmeraldBlossom,partyUnderLivingPercent[1])
-            return true
-        end
-    end
-
-    -- si Tank < TimeDilationPercent => TimeDilationPercent => TimeDilation
-    if game_api.canCast(spells.TimeDilation) then
-        local tanksUnderTimeDilationPercent = game_api.getPartyUnitWithRoleBelowHealthPercent(game_api.getSetting(settings.TimeDilationPercent),30.0,"TANK")
-        if #tanksUnderTimeDilationPercent > 0 then
-            game_api.castSpellOnTarget(spells.TimeDilation,tanksUnderTimeDilationPercent[1])
-            return true
-        end
-    end
-    if game_api.canCast(spells.TimeDilation) then
-        local underTimeDilationPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.TimeDilationPercent) - 10,30.0)
-        if #underTimeDilationPercent > 0 then
-            game_api.castSpellOnTarget(spells.TimeDilation,underTimeDilationPercent[1])
-            return true
-        end
-    end
-
-    if game_api.canCast(spells.TipTheScales) and not game_api.currentPlayerHasAura(auras.TipTheScales,true) then
-        local partyUnderTipTheScalePercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.TipTheScalePercent),99.0)
-        if #partyUnderTipTheScalePercent >= game_api.getSetting(settings.TipTheScaleParty) then
-            game_api.castSpell(spells.TipTheScales)
-            return true
-        end
-    end
-
-    -- (VerdantEmbrace if CallOfYsera)
-    if ( game_api.canCast(spells.DreamBreath) and not game_api.isOnCooldown(spells.DreamBreathFOM) ) then
-        local partyUnderDreamBreathPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.DreamBreathPercent),30.0)
-        if #partyUnderDreamBreathPercent >= game_api.getSetting(settings.DreamBreathParty) then
-            if((game_api.hasTalent(talents.CallOfYsera) and game_api.canCast(spells.VerdantEmbrace))) then
-                game_api.castSpellOnTarget(spells.VerdantEmbrace,game_api.getCurrentPlayer())
-                return true
-            else
-                game_api.castSpell(spells.DreamBreath)
-                return true
+    if ( game_api.canCast(spells.DreamBreath) and not game_api.isOnCooldown(spells.DreamBreathFOM) ) or ( game_api.canCast(spells.SpriritBloom) and not game_api.isOnCooldown(spells.SpriritBloomFOM) ) or game_api.canCastCharge(spells.Reversion,state.reversionMaxCharge) then
+        local party = game_api.getPartyUnits()
+        local count = 0
+        local lowestRemainingTime = 999999
+        local lowestHp = 100
+        for i = 1, #party do
+            if game_api.unitHasAura(party[i],auras.Echo,true) then
+                count = count + 1
+                local remain = game_api.unitAuraRemainingTime(party[i],auras.Echo,true)
+                if remain < lowestRemainingTime then
+                    lowestRemainingTime = remain
+                end
+                local hp = game_api.unitHealthPercent(party[i])
+                if hp < lowestHp then
+                    lowestHp = hp
+                end
             end
         end
-    end
 
-    -- FB max rank
-    if ( game_api.canCast(spells.FireBreath) and not game_api.isOnCooldown(spells.FireBreathFOM) )  then
-        game_api.castSpell(spells.FireBreath)
-        return true
-    end
+        if ( game_api.canCast(spells.DreamBreath) and not game_api.isOnCooldown(spells.DreamBreathFOM) ) and count >= game_api.getSetting(settings.DreamBreathParty) and lowestHp <= game_api.getSetting(settings.DreamBreathPercent) then
+            game_api.castSpell(spells.DreamBreath)
+            return true
+        end
 
-    -- consume leaping flames
-    if game_api.currentPlayerHasAura(auras.LeapingFlames,true) and game_api.canCast(spells.LivingFlame) and game_api.unitAuraStackCount(state.currentPlayer,auras.EssenceBurst,true) < 2 then
-        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.LivingFlamePercent) ,30.0)
-        if #partyUnderLivingPercent > 0  then
-            game_api.castSpellOnTarget(spells.LivingFlame,partyUnderLivingPercent[1])
+        if ( game_api.canCast(spells.SpriritBloom) and not game_api.isOnCooldown(spells.SpriritBloomFOM) ) and count >= game_api.getSetting(settings.BloomParty) and lowestHp <= game_api.getSetting(settings.BloomPercent) then
+            game_api.castSpell(spells.SpriritBloom)
+            return true
+        end
+
+        if game_api.canCastCharge(spells.Reversion,state.reversionMaxCharge) and ( lowestRemainingTime <= 1000 ) then
+            game_api.castSpellOnTarget(spells.Reversion,state.currentPlayer)
             return true
         end
     end
 
-    -- si BloomParty < BloomPercent => SpriritBloom
-    if ( game_api.canCast(spells.SpriritBloom) and not game_api.isOnCooldown(spells.SpriritBloomFOM) ) then
-        local partyUnderBloomPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.BloomPercent),30.0)
-        if #partyUnderBloomPercent >= game_api.getSetting(settings.BloomParty) then
-            game_api.castSpellOnTarget(spells.SpriritBloom,partyUnderBloomPercent[1])
-            return true
-        end
-    end
 
     --Echo Logic
     if game_api.canCast(spells.Echo) then
@@ -225,14 +185,47 @@ function Healing()
         end
     end
 
+
+    -- si Tank < TimeDilationPercent => TimeDilationPercent => TimeDilation
+    if game_api.canCast(spells.TimeDilation) then
+        local tanksUnderTimeDilationPercent = game_api.getPartyUnitWithRoleBelowHealthPercent(game_api.getSetting(settings.TimeDilationPercent),30.0,"TANK")
+        if #tanksUnderTimeDilationPercent > 0 then
+            game_api.castSpellOnTarget(spells.TimeDilation,tanksUnderTimeDilationPercent[1])
+            return true
+        end   
+    end
+
+
+    -- consume leaping flames
+    if game_api.currentPlayerHasAura(auras.LeapingFlames,true) and game_api.canCast(spells.LivingFlame) then
+        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.LivingFlamePercent) + 10.0 ,30.0)
+        if #partyUnderLivingPercent > 0  then
+            game_api.castSpellOnTarget(spells.LivingFlame,partyUnderLivingPercent[1])
+            return true
+        end
+    end
+
+
+
+    -- si BloomParty < BloomPercent => SpriritBloom
+    if ( game_api.canCast(spells.SpriritBloom) and not game_api.isOnCooldown(spells.SpriritBloomFOM) ) then
+        local partyUnderBloomPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.BloomPercent),30.0)
+        if #partyUnderBloomPercent >= game_api.getSetting(settings.BloomParty) then
+            game_api.castSpellOnTarget(spells.SpriritBloom,partyUnderBloomPercent[1])
+            return true
+        end 
+    end
+
+
     -- si TemportalAnomalyParty < TemportalAnomalyPercent => TemporalAnomaly 
     if game_api.canCast(spells.TemporalAnomaly) then
         local partyUnderTemporalPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.TemportalAnomalyPercent),30.0)
         if #partyUnderTemporalPercent > game_api.getSetting(settings.TemportalAnomalyParty) then
             game_api.castSpell(spells.TemporalAnomaly)
             return true
-        end
+        end   
     end
+
 
     if game_api.canCastCharge(spells.Reversion,state.reversionMaxCharge) then
         local partyUnderReversionPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.ReversionPercent),30.0)
@@ -252,10 +245,29 @@ function Healing()
 
     -- FB + LivingFlame
 
- 
+    -- (VerdantEmbrace if CallOfYsera)
+
+    if ( game_api.canCast(spells.DreamBreath) and not game_api.isOnCooldown(spells.DreamBreathFOM) ) then
+        local partyUnderDreamBreathPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.DreamBreathPercent),30.0)
+        if #partyUnderDreamBreathPercent >= game_api.getSetting(settings.DreamBreathParty) then
+            if((game_api.hasTalent(talents.CallOfYsera) and game_api.canCast(spells.VerdantEmbrace))) then
+                game_api.castSpellOnTarget(spells.VerdantEmbrace,game_api.getCurrentPlayer())
+                return true
+            else
+                game_api.castSpell(spells.DreamBreath)
+                return true
+            end    
+        end
+    end
 
 
-
+    if game_api.canCast(spells.TipTheScales) and not game_api.currentPlayerHasAura(auras.TipTheScales,true) then
+        local partyUnderTipTheScalePercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.TipTheScalePercent),99.0)
+        if #partyUnderTipTheScalePercent >= game_api.getSetting(settings.TipTheScaleParty) then
+            game_api.castSpell(spells.TipTheScales)
+            return true
+        end
+    end
 
     -- SpriritBloom rank 3
     -- Echo is EchoSpread
@@ -271,40 +283,13 @@ function Healing()
 
 
     -- Rewind
-    if game_api.canCast(spells.Rewind) and game_api.currentPlayerHasAura(auras.CycleOfLife,true) then
+    if game_api.canCast(spells.Rewind) then
         local partyUnderRewindPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.RewindPercent),40.0)
         if #partyUnderRewindPercent > game_api.getSetting(settings.RewindParty) then
             game_api.castSpell(spells.Rewind)
             return true
         end
     end
-
-    if game_api.canCast(spells.Rewind) then
-        local partyUnderRewindPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.RewindPercent) - 15,40.0)
-        if #partyUnderRewindPercent > game_api.getSetting(settings.RewindParty) then
-            game_api.castSpell(spells.Rewind)
-            return true
-        end
-    end
-
-    if game_api.getToggle(settings.DreamFlight) then
-        -- DreamFlight
-        if game_api.canCast(spells.DreamFlight) and game_api.currentPlayerHasAura(auras.CycleOfLife,true) then
-            local partyUnderDFPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.DreamFlightPercent),40.0)
-            if #partyUnderDFPercent > game_api.getSetting(settings.DreamFlightPercent) then
-                game_api.castAOESpellOnTarget(spells.DreamFlight,partyUnderDFPercent[1])
-                return true
-            end
-        end
-        if game_api.canCast(spells.DreamFlight) then
-            local partyUnderDFPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.DreamFlightPercent) - 15,40.0)
-            if #partyUnderDFPercent > game_api.getSetting(settings.DreamFlightPercent) then
-                game_api.castAOESpellOnTarget(spells.DreamFlight,partyUnderDFPercent[1])
-                return true
-            end
-        end
-    end
-
 
     -- VerdantEmbrace single 
     if game_api.getToggle(settings.VerdantEmbrace) then
@@ -318,14 +303,6 @@ function Healing()
     end
 
 
-    -- Blossom
-    if game_api.canCast(spells.EmeraldBlossom) and state.currentEssence >= 3 then
-        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.BlossomPercent),30.0)
-        if #partyUnderLivingPercent > game_api.getSetting(settings.BlossomParty)  then
-            game_api.castSpellOnTarget(spells.EmeraldBlossom,partyUnderLivingPercent[1])
-            return true
-        end
-    end
 
     -- LivingFlame Emergency
     if game_api.canCast(spells.LivingFlame) then
@@ -359,7 +336,7 @@ function OnUpdate()
     
     --charged spell
     if game_api.currentPlayerIsChanneling() then
-        if ( game_api.getCurrentPlayerChannelID() == spells.FireBreath or game_api.getCurrentPlayerChannelID() == spells.FireBreathFOM ) and utils.EmpowerRank(game_api.getCurrentPlayerChannelPercentage(),state.chargedSpellsMaxRank) > (state.chargedSpellsMaxRank - 1) then
+        if ( game_api.getCurrentPlayerChannelID() == spells.FireBreath or game_api.getCurrentPlayerChannelID() == spells.FireBreathFOM ) and utils.EmpowerRank(game_api.getCurrentPlayerChannelPercentage(),state.chargedSpellsMaxRank) > 0 then
             game_api.castSpell(spells.FireBreath);
             return true
         end
