@@ -139,8 +139,9 @@ function Healing()
 
     -- consume ancient flames
     if game_api.currentPlayerHasAura(auras.AncientFlames,true) and game_api.canCast(spells.LivingFlame) and game_api.unitAuraStackCount(state.currentPlayer,auras.EssenceBurst,true) < 2 then
-        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.LivingFlamePercent) + 10.0 ,30.0)
+        local partyUnderLivingPercent = game_api.getPartyUnitBelowHealthPercent(game_api.getSetting(settings.LivingFlamePercent) ,30.0)
         if #partyUnderLivingPercent > 0  then
+            print("Living Flame 1")
             game_api.castSpellOnTarget(spells.LivingFlame,partyUnderLivingPercent[1])
             return true
         end
